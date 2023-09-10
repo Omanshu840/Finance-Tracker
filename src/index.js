@@ -1,17 +1,52 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
+import './index.css'
+import { ConfigProvider } from 'antd';
+import rootReducer from './reducer';
+import { createStore } from "redux";
+import { screens } from './constants';
+import { Provider} from "react-redux";
+
+const jwtToken = localStorage.getItem("token");
+
+let initialState = {
+  screen: (jwtToken) ? screens.EXPENSES : screens.LOGIN,
+}
+
+const store = createStore(rootReducer, initialState, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <Provider store={store}>
+      <ConfigProvider
+        theme={{
+          "components": {
+            "Drawer": {
+              "colorBgElevated": "var(--priColor1)",
+              "colorText": "var(--secColor1)",
+              "colorIcon": "var(--secColor1)",
+              "colorIconHover": "var(--secColor1)"
+            },
+            "Modal": {
+              "contentBg": "var(--priColor1)",
+              "colorText": "var(--secColor1)",
+            },
+            "Form": {
+              "controlOutline": "var(--priColor2)",
+              "colorTextDescription": "var(--secColor2)",
+              "colorText": "var(--secColor1)",
+              "colorBorder": "var(--priColor2)"
+            }
+          },
+          token: {
+            fontFamily: "Montserrat",
+            "colorTextBase": "var(--secColor1)"
+          }
+      }}>
+        <App />
+      </ConfigProvider>
+    </Provider>
   </React.StrictMode>
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
