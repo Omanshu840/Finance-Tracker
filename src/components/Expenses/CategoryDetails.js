@@ -1,4 +1,4 @@
-import { Drawer, Dropdown} from "antd";
+import { Drawer, Dropdown, Empty} from "antd";
 import React, { useEffect, useState } from "react";
 import { dateStringToNumber, formatDateToDDWW } from "../../utils";
 import { MoreOutlined } from "@ant-design/icons";
@@ -23,7 +23,7 @@ const CategoryDetails = (props) => {
             setDataSource(dataSource);
         }
     }, [expenses]);
-	
+
 	const items = [
 		{
 		  key: '1',
@@ -78,7 +78,7 @@ const CategoryDetails = (props) => {
 						)
 					})
                 ) : (
-                    <h1>No Data Found</h1>
+                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} style={{marginTop: '200px'}}/>
                 )}
             </Drawer>
         </div>
