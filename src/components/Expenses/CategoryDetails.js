@@ -6,6 +6,7 @@ import { MoreOutlined } from "@ant-design/icons";
 const CategoryDetails = (props) => {
     const { isOpen, onClose, category, expenses } = props;
     const [dataSource, setDataSource] = useState([]);
+	const user = JSON.parse(localStorage.getItem('user'))
 
     useEffect(() => {
         if (expenses) {
@@ -46,12 +47,18 @@ const CategoryDetails = (props) => {
             >
                 {dataSource && dataSource.length ? (
                     dataSource.map(expense => {
+						let amount = 0;
+						expense.contributors.forEach(contributor => {
+							if(contributor.user === user._id) {
+								amount += contributor.amount;
+							}
+						})
 						return (
 							<div className="expense-card">
 								<div style={{display: "flex", justifyContent: 'space-between'}}>
 									<div>
 										<div style={{fontSize: '18px', marginBottom: '5px', marginTop: '20px'}}>
-											₹{expense.amount}
+											₹{amount}
 										</div>
 										<div style={{color: 'var(--secColor2)', fontWeight: 'bold', fontSize: '16px'}}>
 											{expense.name}

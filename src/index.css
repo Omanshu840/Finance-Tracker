@@ -6,6 +6,7 @@
     --priColor2: #C9EEFF;
     --secColor1: #00235B;
     --secColor2: #0E6DFD;
+    --secColor3: #3B3B3B;
     --btnColor: #0E6DFD;
     /* #3572d5 */
     --borderColor: #ced4da;
@@ -17,6 +18,7 @@
     --priColor2: #393E46;
     --secColor1: #05C5C0;
     --secColor2: #797A7F;
+    --secColor3: #92ddc8;
     --btnColor: #797A7F;
     --borderColor: #6a6c6e;
 }
@@ -51,6 +53,10 @@ body {
 
 .mt-50 {
     margin-top: 50px;
+}
+
+.p-10 {
+    padding: 10px;
 }
 
 .main .summary {

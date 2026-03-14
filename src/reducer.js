@@ -2,6 +2,12 @@ import { Actions } from "./actions";
 
 const rootReducer = (state, action) => {
     switch (action.type) {
+        case Actions.SET_LOADING: {
+            return {
+                ...state,
+                isLoading: action.payload
+            }
+        }
         case Actions.CHANGE_SCREEN: {
             return {
                 ...state,
@@ -21,6 +27,12 @@ const rootReducer = (state, action) => {
                     ...state.expenses,
                     action.payload
                 ]
+            }
+        }
+        case Actions.SET_USERS: {
+            return {
+                ...state,
+                users: action.payload
             }
         }
         default:

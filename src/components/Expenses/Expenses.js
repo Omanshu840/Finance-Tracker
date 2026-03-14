@@ -1,14 +1,22 @@
-import {Col, FloatButton, Row, Spin, message} from 'antd'
+import {Col, FloatButton, Row, Spin, message, Button} from 'antd'
 import React, { useEffect, useState } from 'react'
-import { PlusOutlined } from '@ant-design/icons';
-import {categories} from '../../constants';
+import { PlusOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
+import {categories, monthNames} from '../../constants';
 import NewExpense from './NewExpense';
 import CategoryDetails from './CategoryDetails';
 import { connect } from 'react-redux';
-import { addExpense } from '../../service';
-import { AddExpense } from '../../actions';
+import { AddExpense, SetLoading } from '../../actions';
+import services from '../../services';
 
 const Expenses = (props) => {
+    const {
+        isLoading,
+        setLoading,
+        expenses,
+        activeDate,
+        handleMonthChange
+    } = props;
+
     const [isExpenseFormOpen, setExpenseFormOpen] = useState(false);
     const [api, contextHolder] = message.useMessage();
     const [categoryDetails, setCategoryDetails] = useState({
@@ -17,21 +25,20 @@ const Expenses = (props) => {
     });
     const [total, setTotal] = useState(0);
     const [categorySum, setCategorySum] = useState({});
-    const [isLoading, setIsLoading] = useState(false);
-
-    const expenses = props.expenses;
 
     useEffect(() => {
         if(expenses) {
             let total = 0;
             let categorySum = {};
+            const user = JSON.parse(localStorage.getItem('user'))
             expenses.forEach(expense => {
-                if(categorySum[expense.category]) {
-                    categorySum[expense.category] += expense.amount;
-                } else {
-                    categorySum[expense.category] = expense.amount;
-                }
-                total += expense.amount;
+                expense.contributors.forEach(contributor => {
+                    console.log(contributor._id, user._id);
+                    if(contributor.user === user._id) {
+                        categorySum[expense.category] = (categorySum[expense.category] || 0) + contributor.amount;
+                        total += contributor.amount;
+                    }
+                })
             })
             setTotal(total);
             setCategorySum(categorySum)
@@ -39,8 +46,22 @@ const Expenses = (props) => {
     }, [expenses])
 
     const onFinish = (formData) => {
-        setIsLoading(true);
-        addExpense(formData.name, formData.amount, formData.category, formData.description, `${formData.date.$d}`)
+        setExpenseFormOpen(false);
+        setLoading(true);
+        const user = JSON.parse(localStorage.getItem('user'))
+        const contributors = [{
+            _id: user._id,
+            amount: formData.amount
+        }]
+        services.addExpense(
+            formData.name,
+            formData.amount,
+            formData.category,
+            formData.description,
+            `${formData.date.$d}`,
+            contributors,
+            user._id
+        )
         .then(response => {
             if(response.error) {
                 api.open({
@@ -48,17 +69,17 @@ const Expenses = (props) => {
                     content: response.error,
                 });
             } else {
-                setExpenseFormOpen(false)
                 props.dispatch(AddExpense(response.expense))
             }
-            setIsLoading(false);
         })
         .catch(error => {
             api.open({
                 type: 'error',
                 content: "Couldn't process your request at the moment. Please try again later",
             })
-            setIsLoading(false);
+        })
+        .finally(() => {
+            setLoading(false);
         })
     }
 
@@ -72,11 +93,27 @@ const Expenses = (props) => {
 
     return (
         <div className='main'>
-            <Spin spinning={!expenses || isLoading} size='large' style={{maxHeight: '100vh', height: '90vh'}}>
+            <Spin spinning={isLoading} size='large' style={{maxHeight: '100vh', height: '90vh'}}>
                 <Row justify={'center'}>
-                    <Col className='summary' xs={12}>
+                    <Col className='summary-back'>
+                        <Button
+                            type={"primary"}
+                            icon={<LeftOutlined />}
+                            style={{width: '50px', height: '50px', margin: '10px'}}
+                            onClick={() => handleMonthChange(true)}
+                        />
+                    </Col>
+                    <Col className='summary' xs={12} md={8} lg={6}>
                         <div style={{fontSize: '30px'}}>{total}</div>
-                        <div>September</div>
+                        <div>{monthNames[activeDate.month]} {activeDate.year}</div>
+                    </Col>
+                    <Col className='summary-back'>
+                        <Button
+                            type={"primary"}
+                            icon={<RightOutlined />}
+                            style={{width: '50px', height: '50px', margin: '10px'}}
+                            onClick={() => handleMonthChange(false)}
+                        />
                     </Col>
                 </Row>
                 <Row justify={'space-evenly'} className='mt-50' gutter={[0, 24]}>
@@ -112,11 +149,13 @@ const Expenses = (props) => {
 }
 
 const mapStateToProps = state => ({
-	expenses: state.expenses
+	expenses: state.expenses,
+    isLoading: state.isLoading
 });
 
 const mapDispatchToProps = dispatch => ({
-	dispatch
+	dispatch,
+    setLoading: (isLoading) => dispatch(SetLoading(isLoading))
 });
 
 export default connect(

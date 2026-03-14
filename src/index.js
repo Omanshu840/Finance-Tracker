@@ -12,6 +12,7 @@ const jwtToken = localStorage.getItem("token");
 
 let initialState = {
   screen: (jwtToken) ? screens.EXPENSES : screens.LOGIN,
+  isLoading: false
 }
 
 const store = createStore(rootReducer, initialState, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());

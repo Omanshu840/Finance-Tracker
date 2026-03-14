@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Form, Input, message } from 'antd';
-import { LogIn } from '../service';
+import services from '../services';
 import { connect } from 'react-redux';
 import { ChangeScreenAction } from '../actions';
 import { screens } from '../constants';
@@ -11,8 +11,8 @@ const Login = (props) => {
     const [messageApi, contextHolder] = message.useMessage();
 
     const onFinish = (values) => {
-        LogIn(values.email, values.password)
-        .then(response => {
+
+        const handleResponse = (response) => {
             if(response.error) {
                 error(response.error)
             } else {
@@ -20,7 +20,19 @@ const Login = (props) => {
                 localStorage.setItem("user", JSON.stringify(response.user))
                 props.dispatch(ChangeScreenAction(screens.EXPENSES))
             }
-        })
+        }
+
+        if(isLogin) {
+            services.LogIn(values.email, values.password)
+            .then(response => {
+                handleResponse(response);
+            })
+        } else {
+            services.signUp(values.name, values.email, values.password)
+            .then(response =>  {
+                handleResponse(response)
+            })
+        }
     };
 
     const error = (message) => {
@@ -44,7 +56,7 @@ const Login = (props) => {
                 </div>
                 {!isLogin &&
                     <Form.Item
-                        name="ame"
+                        name="name"
                         rules={[
                         {
                             required: true,

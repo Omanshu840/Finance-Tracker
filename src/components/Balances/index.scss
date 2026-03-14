@@ -1,0 +1,98 @@
+.split-expense-modal {
+    .ant-modal-content {
+        min-height: 70vh;
+    }
+
+    .add-members {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        
+        .contributors {
+            display: flex;
+            flex-wrap: wrap;
+            column-gap: 5px;
+            row-gap: 5px;
+            margin-bottom: 20px;
+
+            .contributor {
+                background-color: var(--priColor2);
+                padding: 10px;
+                border-radius: 5px;
+            }
+        }
+    }
+}
+
+.balances {
+    .summary {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        
+        .total {
+            background-color: var(--secColor2);
+            color: var(--priColor1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px;
+            font-size: 30px;
+            text-align: center;
+        }
+
+        .items {
+            display: flex;
+            justify-content: center;
+        }
+
+        .owes, .owed {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--priColor2);
+            color: var(--secColor1);
+            padding: 15px;
+            margin: 10px;
+            border-radius: 10px;
+
+            .amount {
+                font-size: 20px;
+                margin-bottom: 8px;
+                font-weight: 500;
+            }
+        }
+    }
+
+    .friends {
+        display: flex;
+        flex-direction: column;
+        row-gap: 10px;
+        color: var(--secColor1);
+
+        .friend {
+            background-color: var(--baseColor);
+            padding: 10px;
+            box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+            border-radius: 10px;
+
+            .friend-summary {
+                display: flex;
+                justify-content: space-between;
+
+                .friend-total {
+                    font-size: 20px;
+                    font-weight: 600;
+                    color: var(--secColor2);
+                }
+
+                .friend-items {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    color: var(--secColor3);
+                }
+            }
+        }
+    }
+}

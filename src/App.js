@@ -1,33 +1,29 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import Expenses from './components/Expenses/Expenses';
 import { screens } from './constants';
-import Assets from './components/Assets';
-import Profile from './components/Profile';
+import Balances from './components/Balances/Balances';
 import Navigation from './components/Navigation';
 import Login from './components/Login';
-import { getExpenses } from './service';
-import { SetExpenses } from './actions';
+import { SetExpenses, SetLoading } from './actions';
 import { message } from 'antd';
+import Profile from './components/Profile/Profile';
+import services from './services';
 
 const App = (props) => {
-	const screen = props.screen;
-	const expenses = props.expenses;
-	const dispatch = props.dispatch;
+	const {
+		screen,
+		dispatch,
+		setLoading
+	} = props;
+
 	const [messageApi, contextHolder] = message.useMessage();
+	const [activeDate, setActiveDate] = useState({
+		month: (new Date()).getMonth(),
+		year: (new Date()).getFullYear()
+	})
 
 	useEffect(() => {
-		if(!expenses && screen === screens.EXPENSES) {
-			getExpenses()
-			.then(response => {
-				if(response.expenses) {
-					dispatch(SetExpenses(response.expenses))
-				} else {
-					error(response.error)
-				}
-			})
-		}
-
 		if(window.matchMedia('(prefers-color-scheme: dark)').matches) {
 			document.body.classList.add("dark-mode")
 		}
@@ -45,7 +41,21 @@ const App = (props) => {
 				document.body.classList.remove("dark-mode")
 			}
 		});
-	}, [screen])
+	}, [])
+
+	useEffect(() => {
+		setLoading(true);
+		services.getExpenses(activeDate)
+		.then(response => {
+			if(response.expenses) {
+				dispatch(SetExpenses(response.expenses))
+			} else {
+				error(response.error)
+			}
+		}).finally(() => {
+			setLoading(false);
+		})
+	}, [activeDate])
 
 	const error = (message) => {
         messageApi.open({
@@ -54,14 +64,47 @@ const App = (props) => {
         });
     };
 
+	const handleMonthChange = (isBack) => {
+		if(isBack) {
+			if(activeDate.month === 0) {
+				setActiveDate({
+					year: activeDate.year - 1,
+					month: 11
+				})
+			} else {
+				setActiveDate({
+					...activeDate,
+					month: activeDate.month - 1
+				})
+			}
+		} else {
+			if(activeDate.month === 11) {
+				setActiveDate({
+					year: activeDate.year + 1,
+					month: 0
+				})
+			} else {
+				setActiveDate({
+					...activeDate,
+					month: activeDate.month + 1
+				})
+			}
+		}
+	}
+
 	return (
     	<>
 			{contextHolder}
 			{(screen === screens.LOGIN) && <Login/>}
 			{(screen !== screens.LOGIN) && 
 				<>
-					{(screen === screens.EXPENSES) && <Expenses/>}
-					{(screen === screens.ASSETS) && <Assets/>}
+					{(screen === screens.EXPENSES) &&
+						<Expenses
+							activeDate={activeDate}
+							handleMonthChange={handleMonthChange}
+						/>
+					}
+					{(screen === screens.ASSETS) && <Balances/>}
 					{(screen === screens.PROFILE) && <Profile/>}
 					<Navigation/>
 				</>
@@ -72,12 +115,14 @@ const App = (props) => {
 
 
 const mapStateToProps = state => ({
+	isLoading: state.isLoading,
 	screen: state.screen,
 	expenses: state.expenses
 });
 
 const mapDispatchToProps = dispatch => ({
-	dispatch
+	dispatch,
+	setLoading: (isLoading) => dispatch(SetLoading(isLoading))
 });
 
 export default connect(
